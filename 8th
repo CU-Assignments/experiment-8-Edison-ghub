@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login Form</title>
+</head>
+<body>
+    <h2>Login Form</h2>
+    <form action="loginServlet" method="post">
+        Username: <input type="text" name="username"><br><br>
+        Password: <input type="password" name="password"><br><br>
+        <input type="submit" value="Login">
+    </form>
+</body>
+</html>
+
+import javax.servlet.*;
+import javax.servlet.http.*;
+import java.io.*;
+
+public class LoginServlet extends HttpServlet {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+
+        // Simple validation: username = "admin" and password = "password123"
+        if ("admin".equals(username) && "password123".equals(password)) {
+            // Successful login
+            response.setContentType("text/html");
+            PrintWriter out = response.getWriter();
+            out.println("<h1>Welcome, " + username + "!</h1>");
+        } else {
+            // Invalid login
+            response.setContentType("text/html");
+            PrintWriter out = response.getWriter();
+            out.println("<h1>Invalid username or password!</h1>");
+        }
+    }
+}
+<web-app>
+    <servlet>
+        <servlet-name>loginServlet</servlet-name>
+        <servlet-class>LoginServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>loginServlet</servlet-name>
+        <url-pattern>/loginServlet</url-pattern>
+    </servlet-mapping>
+</web-app>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Employee Search</title>
+</head>
+<body>
+    <h2>Search Employee by ID</h2>
+    <form action="employeeSearchServlet" method="get">
+        Employee ID: <input type="text" name="employeeId"><br><br>
+        <input type="submit" value="Search">
+    </form>
+</body>
+</html>
+import javax.servlet.*;
+import javax.servlet.http.*;
+import java.io.*;
+import java.sql.*;
+
+public class EmployeeSearchServlet extends HttpServlet {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String employeeId = request.getParameter("employeeId");
+
+        String dbUrl = "jdbc:mysql://localhost:3306/your_db_name";
+        String dbUser = "root";
+        String dbPassword = "password";
+
+        response.setContentType("text/html");
+        PrintWriter out = response.getWriter();
+
+        try {
+            Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
+            String query = "SELECT * FROM employees WHERE id = ?";
+            PreparedStatement stmt = conn.prepareStatement(query);
+            stmt.setString(1, employeeId);
+
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                out.println("<h1>Employee Details:</h1>");
+                out.println("ID: " + rs.getInt("id") + "<br>");
+                out.println("Name: " + rs.getString("name") + "<br>");
+                out.println("Position: " + rs.getString("position") + "<br>");
+            } else {
+                out.println("<h1>No employee found with ID " + employeeId + ".</h1>");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            out.println("<h1>Error retrieving data</h1>");
+        }
+    }
+}
+<web-app>
+    <servlet>
+        <servlet-name>employeeSearchServlet</servlet-name>
+        <servlet-class>EmployeeSearchServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>employeeSearchServlet</servlet-name>
+        <url-pattern>/employeeSearchServlet</url-pattern>
+    </servlet-mapping>
+</web-app>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Portal</title>
+</head>
+<body>
+    <h2>Student Attendance</h2>
+    <form action="saveAttendanceServlet" method="post">
+        Student ID: <input type="text" name="studentId"><br><br>
+        Date: <input type="date" name="attendanceDate"><br><br>
+        Status: 
+        <select name="attendanceStatus">
+            <option value="Present">Present</option>
+            <option value="Absent">Absent</option>
+        </select><br><br>
+        <input type="submit" value="Submit Attendance">
+    </form>
+</body>
+</html>
+
+import javax.servlet.*;
+import javax.servlet.http.*;
+import java.io.*;
+import java.sql.*;
+
+public class SaveAttendanceServlet extends HttpServlet {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String studentId = request.getParameter("studentId");
+        String attendanceDate = request.getParameter("attendanceDate");
+        String attendanceStatus = request.getParameter("attendanceStatus");
+
+        String dbUrl = "jdbc:mysql://localhost:3306/your_db_name";
+        String dbUser = "root";
+        String dbPassword = "password";
+
+        response.setContentType("text/html");
+        PrintWriter out = response.getWriter();
+
+        try {
+            Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
+            String query = "INSERT INTO attendance (student_id, attendance_date, status) VALUES (?, ?, ?)";
+            PreparedStatement stmt = conn.prepareStatement(query);
+            stmt.setString(1, studentId);
+            stmt.setString(2, attendanceDate);
+            stmt.setString(3, attendanceStatus);
+
+            int rowsAffected = stmt.executeUpdate();
+
+            if (rowsAffected > 0) {
+                out.println("<h1>Attendance submitted successfully!</h1>");
+            } else {
+                out.println("<h1>Error submitting attendance.</h1>");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            out.println("<h1>Error saving attendance</h1>");
+        }
+    }
+}
+<web-app>
+    <servlet>
+        <servlet-name>saveAttendanceServlet</servlet-name>
+        <servlet-class>SaveAttendanceServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>saveAttendanceServlet</servlet-name>
+        <url-pattern>/saveAttendanceServlet</url-pattern>
+    </servlet-mapping>
+</web-app>
